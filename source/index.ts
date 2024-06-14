@@ -24,11 +24,11 @@ function quote(string: string): string {
         : '"' + string + '"';
 }
 
-function str(key: string | number, holder: any, limit: number, indent: string = " ", gap = "", rep: ((key: string, value: any) => any) | string[] | undefined | null): string | null {
+export function str(key: string | number, holder: any, limit: number, indent: string = " ", gap = "", rep: ((key: string, value: any) => any) | string[] | undefined | null): string | null {
 
     // Produce a string from holder[key].
 
-    let i: number,
+    let
         k: string,
         v: string | null,
         length: number,
@@ -86,7 +86,7 @@ function str(key: string | number, holder: any, limit: number, indent: string = 
                 // The value is an array. Stringify every element. Use null as a placeholder for non-JSON values.
 
                 length = value.length;
-                for (i = 0; i < length; i += 1) {
+                for (let i = 0; i < length; i += 1) {
                     partial[i] = str(i, value, limit, indent, gap, rep) || 'null';
                 }
 
@@ -109,7 +109,7 @@ function str(key: string | number, holder: any, limit: number, indent: string = 
 
             if (rep && Array.isArray(rep)) {
                 length = rep.length;
-                for (i = 0; i < length; i += 1) {
+                for (let i = 0; i < length; i += 1) {
                     if (typeof rep[i] === 'string') {
                         k = rep[i];
                         v = str(k, value, limit, indent, gap, rep);
@@ -149,34 +149,23 @@ function str(key: string | number, holder: any, limit: number, indent: string = 
     return null;
 }
 
-function beautify(value: any, replacer?: ((key: string, value: any) => any) | string[] | null, space?: number | string, limit: number = 0): string {
+export function beautify(value: any, replacer?: ((key: string, value: any) => any) | string[] | null, space?: number | string, limit: number = 0): string {
 
     // The stringify method takes a value and an optional replacer, and an optional space parameter, and returns a JSON text. The replacer can be a function that can replace values, or an array of strings that will select the keys. A default replacer method can be provided. Use of the space parameter can produce text that is more easily readable.
 
-    let i: number;
     let indent = '';
     let gap = ""
 
-    if (typeof limit !== "number") throw new Error("beautifier: limit must be a number");
+    if (typeof limit !== "number") throw new Error("Beautifier Remaster: limit must be a number");
 
     // If the space parameter is a number, make an indent string containing that many spaces.
 
-    if (typeof space === 'number') {
-        for (i = 0; i < space; i += 1) {
-            indent += ' ';
-        }
-
-        // If the space parameter is a string, it will be used as the indent string.
-
-    } else if (typeof space === 'string') {
-        indent = space;
-    }
+    if (typeof space === 'number') indent += " ".repeat(space)
+    else if (typeof space === 'string') indent = space;
 
     // If there is a replacer, it must be a function or an array. Otherwise, throw an error.
 
-    if (replacer && typeof replacer !== 'function' && !Array.isArray(replacer)) {
-        throw new Error('beautifier: wrong replacer parameter');
-    }
+    if (replacer && typeof replacer !== 'function' && !Array.isArray(replacer)) throw new Error('Beautifier Remaster: wrong replacer parameter');
 
     // Make a fake root object containing our value under the key of ''. Return the result of stringifying the value.
 
