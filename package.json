@@ -27,5 +27,8 @@
   "bugs": {
     "url": "https://github.com/gre/json-beautify/issues"
   },
-  "homepage": "https://github.com/gre/json-beautify"
+  "homepage": "https://github.com/gre/json-beautify",
+  "devDependencies": {
+    "@types/node": "^20.14.2"
+  }
 }
