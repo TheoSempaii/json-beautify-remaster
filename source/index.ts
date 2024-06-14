@@ -1,7 +1,6 @@
 const rxEscapable = /[\\\"\u0000-\u001f\u007f-\u009f\u00ad\u0600-\u0604\u070f\u17b4\u17b5\u200c-\u200f\u2028-\u202f\u2060-\u206f\ufeff\ufff0-\uffff]/g;
 
-let gap: string;
-let indent: string;
+
 const meta: { [key: string]: string } = {
     '\b': '\\b',
     '\t': '\\t',
@@ -11,7 +10,7 @@ const meta: { [key: string]: string } = {
     '"': '\\"',
     '\\': '\\\\'
 };
-let rep: ((key: string, value: any) => any) | string[] | undefined | null;
+
 
 function quote(string: string): string {
     rxEscapable.lastIndex = 0;
@@ -25,11 +24,17 @@ function quote(string: string): string {
         : '"' + string + '"';
 }
 
-function str(key: string | number, holder: any, limit: number): string | null {
+function str(key: string | number, holder: any, limit: number, indent: string = " ", gap = "", rep: ((key: string, value: any) => any) | string[] | undefined | null): string | null {
 
     // Produce a string from holder[key].
 
-    let i: number, k: string, v: string | null, length: number, mind: string = gap, partial: string[] = [], value: any = holder[key];
+    let i: number,
+        k: string,
+        v: string | null,
+        length: number,
+        mind: string = gap,
+        partial: string[] = [],
+        value: any = holder[key];
 
     // If the value has a toJSON method, call it to obtain a replacement value.
 
@@ -82,7 +87,7 @@ function str(key: string | number, holder: any, limit: number): string | null {
 
                 length = value.length;
                 for (i = 0; i < length; i += 1) {
-                    partial[i] = str(i, value, limit) || 'null';
+                    partial[i] = str(i, value, limit, indent, gap, rep) || 'null';
                 }
 
                 // Join all of the elements together, separated with commas, and wrap them in brackets.
@@ -107,7 +112,7 @@ function str(key: string | number, holder: any, limit: number): string | null {
                 for (i = 0; i < length; i += 1) {
                     if (typeof rep[i] === 'string') {
                         k = rep[i];
-                        v = str(k, value, limit);
+                        v = str(k, value, limit, indent, gap, rep);
                         if (v) {
                             partial.push(quote(k) + (gap ? ': ' : ':') + v);
                         }
@@ -119,7 +124,7 @@ function str(key: string | number, holder: any, limit: number): string | null {
 
                 for (k in value) {
                     if (Object.prototype.hasOwnProperty.call(value, k)) {
-                        v = str(k, value, limit);
+                        v = str(k, value, limit, indent, gap, rep);
                         if (v) {
                             partial.push(quote(k) + (gap ? ': ' : ':') + v);
                         }
@@ -149,8 +154,8 @@ function beautify(value: any, replacer?: ((key: string, value: any) => any) | st
     // The stringify method takes a value and an optional replacer, and an optional space parameter, and returns a JSON text. The replacer can be a function that can replace values, or an array of strings that will select the keys. A default replacer method can be provided. Use of the space parameter can produce text that is more easily readable.
 
     let i: number;
-    gap = '';
-    indent = '';
+    let indent = '';
+    let gap = ""
 
     if (typeof limit !== "number") throw new Error("beautifier: limit must be a number");
 
@@ -169,14 +174,13 @@ function beautify(value: any, replacer?: ((key: string, value: any) => any) | st
 
     // If there is a replacer, it must be a function or an array. Otherwise, throw an error.
 
-    rep = replacer;
     if (replacer && typeof replacer !== 'function' && !Array.isArray(replacer)) {
         throw new Error('beautifier: wrong replacer parameter');
     }
 
     // Make a fake root object containing our value under the key of ''. Return the result of stringifying the value.
 
-    return str('', { '': value }, limit) ?? '';
+    return str('', { '': value }, limit, indent, gap, replacer) ?? '';
 }
 
 export default beautify;
